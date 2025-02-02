@@ -1,44 +1,127 @@
 # MentisPro - Real-time Cognitive Load Monitoring
 
-A sophisticated React application that uses TensorFlow.js to monitor and analyze cognitive load in real-time. The system uses advanced machine learning techniques to process multiple input signals and provide comprehensive cognitive state analysis.
+A sophisticated React application that uses TensorFlow.js to monitor and analyze cognitive load in real-time. The system combines advanced machine learning with an intuitive user interface to provide comprehensive cognitive state analysis.
 
-## Features
+## Overview
 
-- **Real-time Monitoring**: Continuous analysis of user's cognitive state
-- **Multi-dimensional Analysis**: Tracks multiple metrics including:
-  - Cognitive Load
-  - Attention Level
-  - Stress Level
-  - Focus Quality
-  - Mental Fatigue
-  - Learning Progress
-  - Workload Intensity
+MentisPro helps users understand and optimize their cognitive state by:
+- Monitoring real-time cognitive load and attention levels
+- Providing visual feedback through dynamic charts and metrics
+- Analyzing patterns in user behavior and cognitive states
+- Offering insights for better productivity and mental well-being
 
-- **Advanced ML Model**: Uses TensorFlow.js with:
-  - Multi-layer neural network
+## User Interface
+
+### Dashboard Components
+- **Real-time Metrics Display**
+  - Cognitive Load Gauge (0-100%)
+  - Attention Level Indicator
+  - Stress Level Classification (Low/Medium/High)
+  - Focus Quality Score
+  - Mental Fatigue Index
+  - Learning Progress Tracker
+  - Workload Intensity Meter
+
+### Visualization Features
+- **Interactive Charts**
+  - Time-series graphs showing cognitive load trends
+  - Multi-metric comparison charts
+  - Focus quality vs. mental fatigue correlation plots
+  - Historical performance analytics
+
+### User Experience
+- **Responsive Design**
+  - Adapts to desktop, tablet, and mobile views
+  - Dark/Light mode support
+  - Customizable dashboard layouts
+- **Real-time Updates**
+  - Continuous metric updates
+  - Smooth animations for state changes
+  - Instant feedback on cognitive state changes
+
+## Machine Learning Architecture
+
+### Neural Network Model
+- **Input Layer**
+  - 12 input neurons for sensor data processing
+  - Batch normalization for stable training
+  - ReLU activation with glorot normal initialization
+
+### Hidden Layers
+1. **First Hidden Layer**
+  - 24 units with ReLU activation
   - Batch normalization
-  - Dropout layers for regularization
-  - Advanced optimizer configuration
+  - Dropout (0.2) for regularization
 
-- **Sophisticated Sensor Data Processing**:
-  - Eye movement tracking
-  - Head position monitoring
-  - Keyboard activity analysis
+2. **Second Hidden Layer**
+  - 16 units with ReLU activation
+  - Advanced pattern recognition capabilities
+
+3. **Third Hidden Layer**
+  - 8 units with ReLU activation
+  - Feature compression and abstraction
+
+### Output Layer
+- 4 output neurons with sigmoid activation
+- Multi-metric prediction capabilities:
+  - Cognitive load estimation
+  - Focus quality assessment
+  - Learning progress evaluation
+  - Mental fatigue quantification
+
+### Model Features
+- **Advanced Training Process**
+  - 150 epochs with batch size of 4
+  - Validation split: 0.2
+  - Adam optimizer with custom learning rate
+  - Mean squared error loss function
+
+- **Sensor Data Processing**
+  - Eye movement tracking analysis
+  - Head position stability monitoring
+  - Keyboard interaction patterns
   - Time-based fatigue modeling
+
+### Real-time Analysis
+- **Sophisticated Metrics**
+  - Saccade rate analysis
+  - Blink rate monitoring
+  - Pupil dilation tracking
+  - Posture stability assessment
+  - Typing pattern analysis
+
+- **Confidence Scoring**
+  - Prediction history stability analysis
+  - Sensor reliability assessment
+  - Variance-based confidence calculation
+  - Time-of-day fatigue correlation
 
 ## Tech Stack
 
+### Frontend
 - React 18
 - TypeScript 4
-- TensorFlow.js 4.22
-- Recharts for visualization
+- Recharts for data visualization
 - Tailwind CSS for styling
+- Custom hooks for state management
+
+### Machine Learning
+- TensorFlow.js 4.22
+- WebGL backend for GPU acceleration
+- CPU fallback support
+- Custom ML service architecture
+
+### Development Tools
+- Modern ES6+ JavaScript
+- Webpack for bundling
+- ESLint for code quality
+- Jest for testing
 
 ## Getting Started
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/mentis-pro.git
+git clone https://github.com/muhnehh/mentis-pro.git
 ```
 
 2. Install dependencies:
@@ -56,10 +139,23 @@ npm start
 
 ## Project Structure
 
-- `/src`
-  - `/components` - React components
-  - `/services` - Core ML services and data processing
-  - `/utils` - Utility functions and helpers
+```
+src/
+├── components/
+│   ├── monitoring/
+│   │   ├── CognitiveLoadMonitor.tsx
+│   │   ├── MetricsDisplay.tsx
+│   │   └── VisualizationCharts.tsx
+│   └── ui/
+│       ├── Dashboard.tsx
+│       └── Controls.tsx
+├── services/
+│   ├── mlService.ts
+│   └── dataProcessing.ts
+└── utils/
+    ├── types.ts
+    └── helpers.ts
+```
 
 ## Contributing
 
@@ -73,6 +169,7 @@ MIT License - feel free to use this project for any purpose.
 
 - TensorFlow.js team for the excellent machine learning framework
 - React team for the robust frontend framework
+- Open source community for various tools and libraries
 
 ## Support
 
