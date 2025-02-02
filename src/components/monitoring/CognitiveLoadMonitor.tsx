@@ -1,104 +1,134 @@
 import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Brain, Activity, Heart } from 'lucide-react';
+import { Brain, Activity, Eye, MousePointer } from 'lucide-react';
+import { cognitiveLoadModel, MLPrediction } from '../../services/mlService';
 
 interface CognitiveLoadMonitorProps {
   data: any[];
 }
 
-interface MLPrediction {
-  mentalState: string;
-  confidence: number;
-  heartRate: number;
-  stressLevel: 'low' | 'medium' | 'high';
-  focusScore: number;
-}
-
 export const CognitiveLoadMonitor: React.FC<CognitiveLoadMonitorProps> = ({ data }) => {
   const [prediction, setPrediction] = useState<MLPrediction>({
-    mentalState: 'Focused',
-    confidence: 0.85,
-    heartRate: 75,
-    stressLevel: 'low',
-    focusScore: 8.5
+    cognitiveLoad: 0.5,
+    attentionLevel: 0.5,
+    stressLevel: 'medium',
+    confidence: 0.8,
+    metrics: {
+      focusQuality: 0.7,
+      mentalFatigue: 0.3,
+      learningProgress: 0.6,
+      workloadIntensity: 0.4
+    }
   });
 
-  // Simulate real-time WiFi CSI signal processing and ML predictions
+  const [sensorData, setSensorData] = useState<any[]>([]);
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate ML model predictions based on WiFi CSI data
-      const newPrediction = {
-        mentalState: ['Focused', 'Relaxed', 'Stressed', 'Distracted'][Math.floor(Math.random() * 4)],
-        confidence: 0.7 + Math.random() * 0.3,
-        heartRate: 65 + Math.random() * 20,
-        stressLevel: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high',
-        focusScore: 5 + Math.random() * 5
-      };
-      setPrediction(newPrediction);
-    }, 5000);
+    // Initialize the ML model when component mounts
+    const initModel = async () => {
+      await cognitiveLoadModel.initialize();
+      console.log('Cognitive Load ML Model initialized');
+    };
+    initModel();
+  }, []);
+
+  // Real-time monitoring using ML model and sensor data
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        // Get prediction from our ML model
+        const newPrediction = await cognitiveLoadModel.predict();
+        setPrediction(newPrediction);
+
+        // Get the latest sensor readings
+        const latestSensorData = cognitiveLoadModel.getLastSensorData();
+        if (latestSensorData) {
+          setSensorData(prev => [...prev.slice(-19), {
+            time: new Date().toLocaleTimeString(),
+            eyeMovement: latestSensorData.eyeMovement,
+            headPosition: latestSensorData.headPosition,
+            keyboardActivity: latestSensorData.keyboardActivity,
+            focusQuality: newPrediction.metrics.focusQuality,
+            mentalFatigue: newPrediction.metrics.mentalFatigue
+          }]);
+        }
+      } catch (error) {
+        console.error('Error predicting cognitive load:', error);
+      }
+    }, 2000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const getCognitiveLoadExplanation = (load: number, trend: 'increasing' | 'decreasing' | 'stable') => {
-    if (load > 80) {
+  const getCognitiveLoadExplanation = (load: number) => {
+    if (load > 0.8) {
       return "High cognitive load detected. Consider taking a break or simplifying current tasks.";
-    } else if (load > 60) {
+    } else if (load > 0.5) {
       return "Moderate cognitive load. You're engaged but not overwhelmed.";
-    } else if (load > 40) {
-      return "Optimal cognitive load range. Good time for focused work.";
     } else {
       return "Low cognitive load. Good time for learning new tasks or complex problem solving.";
     }
   };
 
-  const getCurrentTrend = () => {
-    if (data.length < 2) return 'stable';
-    const lastTwo = data.slice(-2);
-    const diff = lastTwo[1].load - lastTwo[0].load;
-    if (Math.abs(diff) < 5) return 'stable';
-    return diff > 0 ? 'increasing' : 'decreasing';
-  };
-
-  const currentLoad = data[data.length - 1]?.load || 0;
-  const trend = getCurrentTrend();
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-gray-800">Cognitive Load Monitor</h3>
+        <h3 className="text-xl font-bold text-gray-800">Cognitive Load Monitor (ML-powered)</h3>
         <div className="flex space-x-4">
           <div className="flex items-center">
             <Brain className="w-5 h-5 text-blue-500 mr-2" />
-            <span className="text-sm font-medium">{prediction.mentalState}</span>
-          </div>
-          <div className="flex items-center">
-            <Heart className="w-5 h-5 text-red-500 mr-2" />
-            <span className="text-sm font-medium">{Math.round(prediction.heartRate)} BPM</span>
+            <span className="text-sm font-medium">
+              Attention: {(prediction.attentionLevel * 100).toFixed(1)}%
+            </span>
           </div>
           <div className="flex items-center">
             <Activity className="w-5 h-5 text-green-500 mr-2" />
-            <span className="text-sm font-medium">Focus: {prediction.focusScore.toFixed(1)}/10</span>
+            <span className="text-sm font-medium">
+              Load: {(prediction.cognitiveLoad * 100).toFixed(1)}%
+            </span>
           </div>
         </div>
       </div>
 
       <div className="mb-4">
         <p className="text-gray-700">
-          {getCognitiveLoadExplanation(currentLoad, trend)}
+          {getCognitiveLoadExplanation(prediction.cognitiveLoad)}
         </p>
       </div>
 
+      {/* Cognitive Load Chart */}
       <div className="h-64 mb-6">
+        <h4 className="text-sm font-semibold mb-2">Cognitive Load Trend</h4>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
+          <LineChart data={sensorData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="time" />
             <YAxis />
             <Tooltip />
-            <Line type="monotone" dataKey="load" stroke="#3B82F6" strokeWidth={2} />
+            <Line type="monotone" dataKey="focusQuality" stroke="#3B82F6" name="Focus Quality" />
+            <Line type="monotone" dataKey="mentalFatigue" stroke="#EF4444" name="Mental Fatigue" />
           </LineChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="p-4 rounded-lg bg-blue-50">
+          <h4 className="font-semibold mb-2">Focus Quality</h4>
+          <p className="text-lg">{(prediction.metrics.focusQuality * 100).toFixed(1)}%</p>
+        </div>
+        <div className="p-4 rounded-lg bg-green-50">
+          <h4 className="font-semibold mb-2">Learning Progress</h4>
+          <p className="text-lg">{(prediction.metrics.learningProgress * 100).toFixed(1)}%</p>
+        </div>
+        <div className="p-4 rounded-lg bg-red-50">
+          <h4 className="font-semibold mb-2">Mental Fatigue</h4>
+          <p className="text-lg">{(prediction.metrics.mentalFatigue * 100).toFixed(1)}%</p>
+        </div>
+        <div className="p-4 rounded-lg bg-purple-50">
+          <h4 className="font-semibold mb-2">Workload Intensity</h4>
+          <p className="text-lg">{(prediction.metrics.workloadIntensity * 100).toFixed(1)}%</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -114,8 +144,12 @@ export const CognitiveLoadMonitor: React.FC<CognitiveLoadMonitorProps> = ({ data
           <p>{(prediction.confidence * 100).toFixed(1)}%</p>
         </div>
         <div className="p-4 rounded-lg bg-purple-100">
-          <h4 className="font-semibold mb-2">WiFi CSI Signal</h4>
-          <p>Strong</p>
+          <h4 className="font-semibold mb-2">Sensor Status</h4>
+          <p className="flex items-center">
+            <Eye className="w-4 h-4 mr-1" />
+            <MousePointer className="w-4 h-4 mx-1" />
+            Active
+          </p>
         </div>
       </div>
     </div>
